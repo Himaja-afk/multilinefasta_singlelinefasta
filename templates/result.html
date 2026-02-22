@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Converted FASTA Output</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 40px;
+        }
+        textarea {
+            width: 90%;
+            height: 300px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Input Sequences Converted to Single-line FASTA</h1>
+
+<!-- Display converted FASTA -->
+<textarea readonly style="width:90%; height:300px; font-family: monospace; white-space: pre;">{{ fasta_content }}</textarea>
+<br>
+
+<!-- Buttons -->
+
+<button onclick="window.location.href='/'">
+    Convert Another Sequence
+</button>
+
+</body>
+</html>
