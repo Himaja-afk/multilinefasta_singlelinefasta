@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Webserver to convert multi-line FASTA to single-line FASTA</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh; /* ensures the body fills viewport */
+        }
+
+        .container {
+            text-align: center;
+            padding-top: 40px; /* optional spacing above title */
+            position: relative;
+            z-index: 1; /* ensure title is above GIF */
+        }
+        /* Query textarea */
+        textarea {
+            width: 95%;
+            height: 100px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 16px;
+            resize: vertical;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        /* Submit button */
+        button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        img {
+            width: 800px;
+            height: 600px;
+            opacity: 0.2;
+            position: fixed; /* fixed to viewport */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .query-section {
+            width: 100%;
+            text-align: left;
+            padding-left: 20px;
+            margin-top: 10px; /* reduced space below title */
+        }
+
+        @keyframes moveSmooth {
+            0%   { transform: translate(-60%, -50%); }
+            100% { transform: translate(-40%, -50%); }
+        }
+        /* Footer */
+        footer {
+            text-align: center;
+            color: black;
+        }
+        footer a {
+            color: black;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='images/proteins2.gif') }}" alt="Protein animation">
+    <div class="container">
+        <h1>Webserver to convert multiline FASTA to single-line FASTA</h1>
+    </div>
+
+    <div class="query-section">
+        <h2>Query</h2>
+        <p><u><b>Instuctions:</u></b>
+        <li>The webserver aid in converting the multi-line FASTA to a single-line FASTA</li><br>
+    <li>The format of the input should be in the FASTA format along with the headers in a FASTA file.</li><br>
+    <li>FASTA Format:<br><br>
+>sp|P23456|L_HANTV RNA-directed RNA polymerase L OS=Hantaan virus (strain 76-118) OX=11602 GN=L PE=1 SV=3
+MDKYREIHNKLKEFSPGTLTAVECIDYLDRLYAVRHDIVDQMIKHDWSDNKDSEEAIGKV
+LLFAGVPSNIITALEKKIIPNHPTGKSLKAFFKMTPDNYKISGTTIEFVEVTVTADVDKG
+IREKKLKYEAGLTYIEQELHKFFLKGEIPQPYKITFNVVAVRTDGSNITTQWPSRRNDGV
+VQYMRLVQAEISYVREHLIKTEERAALEAMFNLKFNISTHKSQPYYIPDYKGMEPIGANI
+EDLVDYSKDWLSRARNFSFFEVKGTAVFECFNSNEANHCQRYPMSRKPRNFLLIQCSLIT
+<br>
+    </li><br>
+<li>Multiple sequences can be given in the query section to get the single-line FASTA sequences and the output can be generated in a separate HTML file.</li><br>
+<li>There is an even an option where you can upload the sequences in a FASTA file and the results can be obtained in a separate HTML file.</li><br>
+<li>Note: Give the query sequence properly or else it will thrown an error.</li><br>
+<li>For batch sequence or to get the python code you can retrieve from the GitHub <a href=https://github.com/devhimd19/Multiline-FASTA-Sequence-to-Single-line-FASTA-Sequence">link</a></li><br>
+<li>There is no mininum length of the sequence any sequence length is accepted</li><br>
+<li>This server accepts protein, geneomic and nucleic acid sequences.</li></p>
+<form action="/convert" method="POST" enctype="multipart/form-data">
+    <p><b><i><u>Place your multi-line FASTA sequence here :-</u></i></b></p>
+    <textarea name="fasta_text" placeholder="Paste your multi-line FASTA sequence here..."></textarea>
+    <br><br>
+
+    <p>Or upload a FASTA file:</p>
+    <input type="file" name="fasta_file" accept=".fasta,.fa,.txt">
+    <br><br>
+
+    <button type="submit">Submit</button>
+</form>
+    </div>
+    <section>
+        <section id="Contact">
+        <footer>
+        <p>&copy; 2026 Devarakonda Himaja. All rights reserved.</p>
+        <p><a href="mailto:devarakondahimaja6@gmail.com">devarakondahimaja6@gmail.com</a></p>
+        <p>India</p> 
+    </footer></section>
+</body>
+</html>
