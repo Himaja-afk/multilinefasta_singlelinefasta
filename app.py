@@ -1,73 +1,83 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import os
 
 # ----------------------------
-# FASTA conversion function (UNCHANGED)
+# FASTA conversion function
 # ----------------------------
-def multiline_to_singleline_fasta(input_file, output_file):
-    with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
-        header = None
-        sequence = []
+def multiline_to_singleline_fasta(input_text):
+    lines = input_text.splitlines()
+    output = []
+    header = None
+    sequence = []
 
-        for line in f_in:
-            line = line.strip()
-            if not line:
-                continue
-            if line.startswith('>'):
-                if header:
-                    f_out.write(header + '\n')
-                    f_out.write(''.join(sequence) + '\n')
-                header = line
-                sequence = []
-            else:
-                sequence.append(line)
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith(">"):
+            if header:
+                output.append(header)
+                output.append("".join(sequence))
+            header = line
+            sequence = []
+        else:
+            sequence.append(line)
 
-        if header:
-            f_out.write(header + '\n')
-            f_out.write(''.join(sequence) + '\n')
+    if header:
+        output.append(header)
+        output.append("".join(sequence))
+
+    return "\n".join(output)
+
 
 # ----------------------------
-# Load HTML file
+# Load HTML helper
 # ----------------------------
 def load_html(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
 
+
 # ----------------------------
 # Show index.html
 # ----------------------------
-html_content = load_html("templates/index.html")
-st.markdown(html_content, unsafe_allow_html=True)
+index_html = load_html("templates/index.html")
+
+# Remove Flask form section
+if "<form" in index_html:
+    start = index_html.find("<form")
+    end = index_html.find("</form>") + len("</form>")
+    index_html = index_html[:start] + index_html[end:]
+
+# Replace Flask static path
+index_html = index_html.replace(
+    "{{ url_for('static', filename='images/proteins2.gif') }}",
+    "static/images/proteins2.gif"
+)
+
+st.markdown(index_html, unsafe_allow_html=True)
 
 # ----------------------------
-# Upload & Convert Section
+# Streamlit Input Section
 # ----------------------------
-uploaded_file = st.file_uploader("Upload FASTA file")
-fasta_text = st.text_area("Or paste FASTA here")
+st.markdown("### Place your multi-line FASTA sequence here:")
 
-if st.button("Convert"):
+fasta_text = st.text_area("", height=200)
+uploaded_file = st.file_uploader("Or upload FASTA file", type=["fasta", "fa", "txt"])
 
-    input_path = "input.fasta"
+if st.button("Submit"):
 
     if uploaded_file:
-        with open(input_path, "wb") as f:
-            f.write(uploaded_file.read())
-    elif fasta_text.strip():
-        with open(input_path, "w") as f:
-            f.write(fasta_text)
+        fasta_text = uploaded_file.read().decode("utf-8")
+
+    if not fasta_text.strip():
+        st.error("No input provided.")
     else:
-        st.error("No input provided")
-        st.stop()
+        result = multiline_to_singleline_fasta(fasta_text)
 
-    output_path = "output.fasta"
-    multiline_to_singleline_fasta(input_path, output_path)
+        # Load result.html
+        result_html = load_html("templates/result.html")
 
-    with open(output_path, "r") as f:
-        result = f.read()
+        # Replace Jinja variable manually
+        result_html = result_html.replace("{{ fasta_content }}", result)
 
-    # Load result template and inject content
-    result_html = load_html("templates/result.html")
-    result_html = result_html.replace("{{ fasta_content }}", result)
-
-    st.markdown(result_html, unsafe_allow_html=True)
+        st.markdown(result_html, unsafe_allow_html=True)
