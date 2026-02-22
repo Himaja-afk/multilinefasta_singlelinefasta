@@ -1,17 +1,11 @@
-from flask import Flask, render_template, request, send_file
+import streamlit as st
+import streamlit.components.v1 as components
 import os
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
-
 # ----------------------------
-# FASTA conversion function
+# FASTA conversion function (UNCHANGED)
 # ----------------------------
 def multiline_to_singleline_fasta(input_file, output_file):
-    """
-    Converts a multi-line FASTA file to proper single-line FASTA.
-    Headers remain on their own line.
-    Sequence lines are fully merged into one line.
-    """
     with open(input_file, 'r') as f_in, open(output_file, 'w') as f_out:
         header = None
         sequence = []
@@ -19,9 +13,8 @@ def multiline_to_singleline_fasta(input_file, output_file):
         for line in f_in:
             line = line.strip()
             if not line:
-                continue  # skip empty lines
+                continue
             if line.startswith('>'):
-                # Write previous sequence
                 if header:
                     f_out.write(header + '\n')
                     f_out.write(''.join(sequence) + '\n')
@@ -29,49 +22,52 @@ def multiline_to_singleline_fasta(input_file, output_file):
                 sequence = []
             else:
                 sequence.append(line)
-        
-        # Write last sequence
+
         if header:
             f_out.write(header + '\n')
             f_out.write(''.join(sequence) + '\n')
 
 # ----------------------------
-# Route: Home page (index.html)
+# Load HTML file
 # ----------------------------
-@app.route("/")
-def index():
-    return render_template("index.html")
+def load_html(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        return f.read()
 
+# ----------------------------
+# Show index.html
+# ----------------------------
+html_content = load_html("templates/index.html")
+st.markdown(html_content, unsafe_allow_html=True)
 
 # ----------------------------
-# Route: Handle conversion
+# Upload & Convert Section
 # ----------------------------
-@app.route("/convert", methods=["POST"])
-def convert():
-    fasta_file = request.files.get('fasta_file')
-    fasta_text = request.form.get('fasta_text')
+uploaded_file = st.file_uploader("Upload FASTA file")
+fasta_text = st.text_area("Or paste FASTA here")
+
+if st.button("Convert"):
 
     input_path = "input.fasta"
 
-    # Save uploaded file or textarea content
-    if fasta_file and fasta_file.filename != '':
-        fasta_file.save(input_path)
-    elif fasta_text and fasta_text.strip() != '':
-        with open(input_path, 'w') as f:
+    if uploaded_file:
+        with open(input_path, "wb") as f:
+            f.write(uploaded_file.read())
+    elif fasta_text.strip():
+        with open(input_path, "w") as f:
             f.write(fasta_text)
     else:
-        return "No input provided", 400
+        st.error("No input provided")
+        st.stop()
 
     output_path = "output.fasta"
     multiline_to_singleline_fasta(input_path, output_path)
 
-    # Read converted file
-    with open(output_path, 'r') as f:
-        fasta_content = f.read()
+    with open(output_path, "r") as f:
+        result = f.read()
 
-    return render_template("result.html", fasta_content=fasta_content)
-# ----------------------------
-# Run Flask app
-# ----------------------------
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Load result template and inject content
+    result_html = load_html("templates/result.html")
+    result_html = result_html.replace("{{ fasta_content }}", result)
+
+    st.markdown(result_html, unsafe_allow_html=True)
